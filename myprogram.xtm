@@ -1,0 +1,74 @@
+
+(sys:load "/home/extempore/initialize.xtm")
+
+(define *metro* (make-metro 60))
+
+(define left-hand
+  (let ( (ns '(69   69  72   71  69  69   71    69  67    62  )) 
+         (ds '(0.25 0.5 0.25 0.5 0.5 0.75 0.75  0.5 0.75  1.25)))
+    (lambda (beat notes durations)
+      (play piano (- (car notes) 12) 100 (car durations))
+      (callback (*metro* (+ beat (* 0.95 (car durations)))) 'left-hand  (+ beat (car durations))
+                (if (null? (cdr notes))     ns (cdr notes))                
+                (if (null? (cdr durations)) ds (cdr durations))))))
+
+(left-hand (*metro* 'get-beat) '(60) '(0.5)) 
+
+(play-note (now) piano 60.5 150 44100)
+
+(*metro* 'set-tempo 120)
+
+;; create a metronome starting at 120 bpm
+
+
+;; beat loop
+(define drum-loop
+  (lambda (beat duration)
+    (println beat duration)
+    (if (*metre1* beat 1.0)
+	(play drums *gm-side-stick* 100 duration))
+    (play drums *gm-kick* 80 duration)
+    (callback (*metro* (+ beat (* 0.95 duration))) 'drum-loop (+ beat duration)
+              0.5)))
+
+
+(define *metre1* (make-metre '(4) 0.5))
+
+(drum-loop (*metro* 'get-beat) 0.5)
+
+(define drum-loop)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+(define *metro* (make-metro 140))
+
+(define *metre1* (make-metre '(2 3 4 3 2) .5))
+(define *metre2* (make-metre '(3 5 7 5 3) .5))
+
+;; play first beat of each 'bar'
+(define metre-test
+  (lambda (time)
+    (play-note (*metro* time) drums
+               (random (cons .8 *gm-closed-hi-hat*) (cons .2 *gm-open-hi-hat*))
+               (+ 80 (* 20 (cos (* 2 3.441592 time))))
+               (random (cons .8 500)  (cons .2 2000)))
+    (if (*metre1* time 1.0)
+        (begin (play-note (*metro* time) drums *gm-snare* 200 10000)
+               (play-note (*metro* time) drums *gm-pedal-hi-hat* 200 100000)))
+    (if (*metre2* time 1.0)
+        (begin (play-note (*metro* time) drums *gm-kick* 200 100000)
+               (play-note (*metro* time) drums *gm-ride-bell* 140 100000)))
+    (callback (*metro* (+ time 0.2)) 'metre-test (+ time 0.25))))
+
+(metre-test (*metro* 'get-beat 1.0))
+(define metre-test)
+
+
+;;;;;;;;;;;;;;;;;;;;
+
+(let ((result (regex:matched "C4v1.wav" "^.*([ABCDEFG][#b]?[0-9])v([0-9]+)\.(wav|aif|aiff|ogg)$")))
+  (println (note-name-to-midi-number (cadr result)))
+  (println (string->number (caddr result))))

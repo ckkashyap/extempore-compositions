@@ -10,10 +10,10 @@
 
 
 
-(sys:load "/home/extempore/extempore-compositions/initialize.xtm")
-(sys:load "/home/extempore/extempore-compositions/drums.xtm")
+(sys:load "/Users/kashyap/Documents/extempore-compositions/initialize.xtm")
+(sys:load "/Users/kashyap/Documents/extempore-compositions/drums.xtm")
 
-(play-note (now) drums *gm-kick* 150 44100)
+(play-note (now) synth 60 150 44100)
 
 
 (define *metro* (make-metro 90))
@@ -23,7 +23,7 @@
          (ds '(0.25 0.5 0.25 0.5 0.5 0.75   0.10   0.10    0.55    0.5 0.75  3.25  0.25 0.5 0.25 0.5 0.5 0.75   0.10   0.10    0.55    0.5 4.0 )))
     (lambda (beat notes durations)
       (play fmsynth (- (car notes) 0) 80 (car durations))
-      ;;(play synth (- (car notes) 0) 80 (car durations))
+      (play synth (- (car notes) 12) 80 (car durations))
       (callback (*metro* (+ beat (* 0.95 (car durations)))) 'left-hand  (+ beat (car durations))
                 (if (null? (cdr notes))     ns (cdr notes))                
                 (if (null? (cdr durations)) ds (cdr durations))))))
@@ -42,13 +42,13 @@
   (lambda (beat duration)
     (println beat duration)
     (if (*metre1* beat 1.0)
-	(play drums *gm-snare* 100 duration))
-    (play drums *gm-kick* 80 duration)
+	(play drums 16 100 duration))
+    (play drums 51 80 duration)
     (callback (*metro* (+ beat (* 0.95 duration))) 'drum-loop (+ beat duration)
               0.5)))
 
 
-(define *metre1* (make-metre '(16 2 2 ) 0.5))
+(define *metre1* (make-metre '(2) 0.5))
 
 (drum-loop (*metro* 'get-beat 8) 0.5)
 
@@ -126,3 +126,53 @@
                                (o2 (* (* H freq) I)
                                    (* H freq))))))
           (* 1.0 out))))))
+
+
+
+
+
+
+
+
+
+
+
+(sys:load "libs/external/instruments_ext.xtm")
+
+(define parse-sounds
+  (lambda (file-list)
+    (map (lambda (fname)
+           (let ((result (regex:matched fname "(.*\.wav)([0-9]+)$")))
+             (if (null? result)
+                 (begin (println 'Cannot 'parse 'filename: fname)
+                        #f)
+                 ;; load 4th velocity layer only
+
+
+
+                 (if #t
+                     (list (car (cdr result))
+                           (string->number (car (cdr (cdr result))))
+                           0                 
+                           0)
+                     #f))))
+
+(car (cdr (foldr (lambda (i j) 
+	 (let (
+	       (v (car j))
+	       (lst (car (cdr j)))
+	       )
+	   (list (+ 1 v) (cons (string-append i (number->string v)) lst))))
+       (list 0 ())
+       file-list)))
+
+
+           )))
+
+(load-sampler drums
+	      "/Users/kashyap/Documents/Extempore/99sounds/Samples"
+              0 ;; 'sound bank' index
+              parse-sounds)
+
+
+(play-note (now) drums 40 100 44100)

@@ -1,12 +1,11 @@
 (sys:load "libs/core/instruments.xtm")
 (sys:load "libs/external/instruments_ext.xtm")
 
-(define-sampler drums sampler_note_hermite_c sampler_fx)
+
 (define-instrument synth synth_note_c synth_fx)
 (define-instrument fmsynth fmsynth_note_c fmsynth_fx)
-;(define-instrument saw_synth saw_synth_note_c default_fx)
-(define-sampler piano sampler_note_hermite_c sampler_fx)
-
+(bind-sampler piano sampler_note_hermite_c sampler_fx)
+(bind-sampler drums sampler_note_hermite_c sampler_fx)
 
 (bind-func dsp:[SAMPLE,SAMPLE,i64,i64,SAMPLE*]*
   (lambda (in time chan dat)
@@ -21,3 +20,4 @@
 
 (dsp:set! dsp)
 
+(play-note (now) synth 60 100 44100)

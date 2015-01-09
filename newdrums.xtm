@@ -1,0 +1,36 @@
+
+(define parse-sounds
+  (lambda (file-list)
+    (map (lambda (fname)
+           (let ((result (regex:matched fname "(.*\.wav)([0-9]+)$")))
+             (if (null? result)
+                 (begin (println 'Cannot 'parse 'filename: fname)
+                        #f)
+                 ;; load 4th velocity layer only
+
+
+
+                 (if #t
+                     (list (car (cdr result))
+                           (string->number (car (cdr (cdr result))))
+                           0                 
+                           0)
+                     #f))))
+
+(car (cdr (foldr (lambda (i j) 
+	 (let (
+	       (v (car j))
+	       (lst (car (cdr j)))
+	       )
+	   (list (+ 1 v) (cons (string-append i (number->string v)) lst))))
+       (list 0 ())
+       file-list)))
+
+
+           )))
+
+
+(load-sampler drums
+	      "/Users/kashyap/Documents/Extempore/99sounds/Samples"
+              0 ;; 'sound bank' index
+              parse-sounds)

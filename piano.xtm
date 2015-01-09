@@ -1,0 +1,22 @@
+(define parse-salamander-piano
+  (lambda (file-list)
+    (map (lambda (fname)
+           (let ((result (regex:matched fname "^.*([ABCDEFG][#b]?[0-9])v([0-9]+)\.(wav|aif|aiff|ogg)$")))
+             (if (null? result)
+                 (begin (println 'Cannot 'parse 'filename: fname)
+                        #f)
+                 ;; load 4th velocity layer only
+                 (if (= (string->number (caddr result)) 4)
+                     (list fname
+                           (note-name-to-midi-number (cadr result))
+                           0                 
+                           0)
+                     #f))))
+         file-list)))
+
+
+(load-sampler piano
+	      "/home/extempore/Downloads/piano-samples/SalamanderGrandPianoV2_44.1khz16bit/44.1khz16bit"
+              0 ;; 'sound bank' index
+              parse-salamander-piano)
+

@@ -1,18 +1,21 @@
 
-(sys:load "/home/extempore/initialize.xtm")
+(sys:load "/home/extempore/extempore/extempore-compositions/initialize.xtm")
 
-(define *metro* (make-metro 60))
+
+
+
+(define *metro* (make-metro 90))
 
 (define left-hand
   (let ( (ns '(69   69  72   71  69  69   71    69  67    62  )) 
          (ds '(0.25 0.5 0.25 0.5 0.5 0.75 0.75  0.5 0.75  1.25)))
     (lambda (beat notes durations)
-      (play piano (- (car notes) 12) 100 (car durations))
+      (play fmsynth (- (car notes) 12) 80 (car durations))
       (callback (*metro* (+ beat (* 0.95 (car durations)))) 'left-hand  (+ beat (car durations))
                 (if (null? (cdr notes))     ns (cdr notes))                
                 (if (null? (cdr durations)) ds (cdr durations))))))
 
-(left-hand (*metro* 'get-beat) '(60) '(0.5)) 
+(left-hand (*metro* 'get-beat) '(69) '(0.5)) 
 
 (play-note (now) piano 60.5 150 44100)
 

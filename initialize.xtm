@@ -3,6 +3,7 @@
 
 (define-sampler drums sampler_note_hermite_c sampler_fx)
 (define-instrument synth synth_note_c synth_fx)
+(define-instrument fmsynth fmsynth_note_c fmsynth_fx)
 ;(define-instrument saw_synth saw_synth_note_c default_fx)
 (define-sampler piano sampler_note_hermite_c sampler_fx)
 
@@ -12,53 +13,11 @@
     (cond ((< chan 2)
 	   (+ 0.0
            (synth in time chan dat)
+           (fmsynth in time chan dat)
 	   (drums in time chan dat)
 	   (piano in time chan dat)
 	   ))
 	  (else 0.0))))
 
 (dsp:set! dsp)
-
-
-
-
-
-(define drum-path "/home/extempore/Downloads/OH/")
-(set-sampler-index drums (string-append drum-path "kick_OH_F_9.wav") *gm-kick* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "snareStick_OH_F_9.wav") *gm-side-stick* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "snare_OH_FF_9.wav") *gm-snare* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "hihatClosed_OH_F_20.wav") *gm-closed-hi-hat* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "hihatFoot_OH_MP_12.wav") *gm-pedal-hi-hat* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "hihatOpen_OH_FF_6.wav") *gm-open-hi-hat* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "loTom_OH_FF_8.wav") *gm-low-floor-tom* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "hiTom_OH_FF_9.wav") *gm-hi-floor-tom* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "crash1_OH_FF_6.wav") *gm-crash* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "ride1_OH_FF_4.wav") *gm-ride* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "china1_OH_FF_8.wav") *gm-chinese* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "cowbell_FF_9.wav") *gm-cowbell* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "bellchime_F_3.wav") *gm-open-triangle* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "ride1Bell_OH_F_6.wav") *gm-ride-bell* 0 0 0 1)
-
-
-(define parse-salamander-piano
-  (lambda (file-list)
-    (map (lambda (fname)
-           (let ((result (regex:matched fname "^.*([ABCDEFG][#b]?[0-9])v([0-9]+)\.(wav|aif|aiff|ogg)$")))
-             (if (null? result)
-                 (begin (println 'Cannot 'parse 'filename: fname)
-                        #f)
-                 ;; load 4th velocity layer only
-                 (if (= (string->number (caddr result)) 4)
-                     (list fname
-                           (note-name-to-midi-number (cadr result))
-                           0                 
-                           0)
-                     #f))))
-         file-list)))
-
-
-(load-sampler piano
-	      "/home/extempore/Downloads/piano-samples/SalamanderGrandPianoV2_44.1khz16bit/44.1khz16bit"
-              0 ;; 'sound bank' index
-              parse-salamander-piano)
 

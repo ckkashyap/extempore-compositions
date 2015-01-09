@@ -1,25 +1,38 @@
+(car (cdr (foldr (lambda (i j) 
+	 (let (
+	       (v (car j))
+	       (lst (car (cdr j)))
+	       )
+	   (list (+ 1 v) (cons (string-append i (number->string v)) lst))))
+       (list 0 ())
+       (list "a" "b" "c" "d"))))
 
-(sys:load "/home/extempore/extempore/extempore-compositions/initialize.xtm")
 
 
+
+(sys:load "/home/extempore/extempore-compositions/initialize.xtm")
+(sys:load "/home/extempore/extempore-compositions/drums.xtm")
+
+(play-note (now) drums *gm-kick* 150 44100)
 
 
 (define *metro* (make-metro 90))
 
 (define left-hand
-  (let ( (ns '(69   69  72   71  69  69   71    69  67    62  )) 
-         (ds '(0.25 0.5 0.25 0.5 0.5 0.75 0.75  0.5 0.75  1.25)))
+  (let ( (ns '(69   69  72   71  69  69     68     71.1    71      69  67    62    69   69  72   71  69  69     68     71.1    71      69  68 )) 
+         (ds '(0.25 0.5 0.25 0.5 0.5 0.75   0.10   0.10    0.55    0.5 0.75  3.25  0.25 0.5 0.25 0.5 0.5 0.75   0.10   0.10    0.55    0.5 4.0 )))
     (lambda (beat notes durations)
-      (play fmsynth (- (car notes) 12) 80 (car durations))
+      (play fmsynth (- (car notes) 0) 80 (car durations))
+      ;;(play synth (- (car notes) 0) 80 (car durations))
       (callback (*metro* (+ beat (* 0.95 (car durations)))) 'left-hand  (+ beat (car durations))
                 (if (null? (cdr notes))     ns (cdr notes))                
                 (if (null? (cdr durations)) ds (cdr durations))))))
 
-(left-hand (*metro* 'get-beat) '(69) '(0.5)) 
+(left-hand (*metro* 'get-beat 8) '(69) '(0.0)) 
 
 (play-note (now) piano 60.5 150 44100)
 
-(*metro* 'set-tempo 120)
+(*metro* 'set-tempo 90)
 
 ;; create a metronome starting at 120 bpm
 
@@ -29,15 +42,15 @@
   (lambda (beat duration)
     (println beat duration)
     (if (*metre1* beat 1.0)
-	(play drums *gm-side-stick* 100 duration))
+	(play drums *gm-snare* 100 duration))
     (play drums *gm-kick* 80 duration)
     (callback (*metro* (+ beat (* 0.95 duration))) 'drum-loop (+ beat duration)
               0.5)))
 
 
-(define *metre1* (make-metre '(4) 0.5))
+(define *metre1* (make-metre '(16 2 2 ) 0.5))
 
-(drum-loop (*metro* 'get-beat) 0.5)
+(drum-loop (*metro* 'get-beat 8) 0.5)
 
 (define drum-loop)
 
@@ -75,3 +88,41 @@
 (let ((result (regex:matched "C4v1.wav" "^.*([ABCDEFG][#b]?[0-9])v([0-9]+)\.(wav|aif|aiff|ogg)$")))
   (println (note-name-to-midi-number (cadr result)))
   (println (string->number (caddr result))))
+
+
+
+
+
+
+
+
+(bind-func slider_c
+  (lambda (start:SAMPLE end:SAMPLE dur:i64)
+    (let* ((i (/ 1.0 (convert dur)))
+           (m (/ (- end start) 1.0))
+           (c (- end (* m 1.0)))           
+           (t 0.0))
+      (lambda ()
+        (set! t (+ t i))
+        (if (> t 1.0) (set! t 1.0))
+        (+ (* m t) c)))))
+
+
+(bind-func fmsynth_note_c
+  (let ((lastfrq 440.0))
+    (lambda (data:NoteInitData* nargs:i64 dargs:SAMPLE*)
+      (let ((o1 (osc_c 0.0))
+            (o2 (osc_c 0.0))
+            (slide (slider_c lastfrq (tref data 1) (/ (tref data 3) 16))) ;; slide over 25% of note duration
+            (I (if (> nargs 0) (pref dargs 0) 0.1)) ;; modulation index (generally 0.0-1.0)
+            (H (if (> nargs 1) (pref dargs 1) 10.0)) ;; harmonicity ratio (whole numbers 1.0 - 20.0)
+            (out:SAMPLE 0.0))
+        (set! lastfrq (tref data 1))
+        (lambda (time:i64 chan:i64 freq:SAMPLE amp:SAMPLE)
+          (set! freq (slide))
+          (if (= chan 0)
+              (set! out (o1 (* (/ 5.0 (log freq)) amp)
+                            (+ freq
+                               (o2 (* (* H freq) I)
+                                   (* H freq))))))
+          (* 1.0 out))))))

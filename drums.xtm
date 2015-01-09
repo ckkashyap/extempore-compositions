@@ -49,10 +49,12 @@
 ; (define *gm-open-surdo* 87)
 
 
+(sys:load "libs/external/instruments_ext.xtm")
 (define drum-path "/home/extempore/Downloads/99drums/")
 (set-sampler-index drums (string-append drum-path "kick-slapback.wav") *gm-kick* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "snare-808.wav") *gm-side-stick* 0 0 0 1)
-(set-sampler-index drums (string-append drum-path "snare-chester.wav") *gm-snare* 0 0 0 1)
+(set-sampler-index drums (string-append drum-path "kick-big.wav") *gm-kick-2* 0 0 0 1)
+;(set-sampler-index drums (string-append drum-path "snare-808.wav") *gm-side-stick* 0 0 0 1)
+;(set-sampler-index drums (string-append drum-path "snare-chester.wav") *gm-snare* 0 0 0 1)
 
 ; (define drum-path "/home/extempore/Downloads/OH/")
 ; (set-sampler-index drums (string-append drum-path "kick_OH_F_9.wav") *gm-kick* 0 0 0 1)
@@ -71,3 +73,40 @@
 ; (set-sampler-index drums (string-append drum-path "ride1Bell_OH_F_6.wav") *gm-ride-bell* 0 0 0 1)
 
 
+
+
+(define parse-sounds
+  (lambda (file-list)
+    (map (lambda (fname)
+           (let ((result (regex:matched fname "(.*\.wav)([0-9]+)$")))
+             (if (null? result)
+                 (begin (println 'Cannot 'parse 'filename: fname)
+                        #f)
+                 ;; load 4th velocity layer only
+
+
+
+                 (if #t
+                     (list (car (cdr result))
+                           (string->number (car (cdr (cdr result))))
+                           0                 
+                           0)
+                     #f))))
+
+(car (cdr (foldr (lambda (i j) 
+	 (let (
+	       (v (car j))
+	       (lst (car (cdr j)))
+	       )
+	   (list (+ 1 v) (cons (string-append i (number->string v)) lst))))
+       (list 0 ())
+       file-list)))
+
+
+           )))
+
+
+(load-sampler drums
+	      "/home/extempore/Downloads/99drums/"
+              0 ;; 'sound bank' index
+              parse-sounds)

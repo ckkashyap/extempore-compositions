@@ -1,21 +1,69 @@
 (sys:load "/Users/kashyap/Documents/extempore-compositions/initialize.xtm")
 (sys:load "/Users/kashyap/Documents/extempore-compositions/drums.xtm")
 
-
-
 ;; messiaen drum kit
 (define *metro* (make-metro 120))
 
-(define rhythm
-  (lambda (beat)
-    (play-note (*metro* beat) drums 52 100 11025)
-    (play-note (*metro* beat) drums 88 100 11025)
-    (callback (*metro* (+ beat 0.2)) 'rhythm (+ beat 0.25))))
+(define popcorn1
+  '(
+    (71   69   71  66  62  66  59 )
+    (1/2  1/2  1/2 1/2 1/2 1/2 2/2)))
+(define popcorn2
+  '(
+    (71  73  74  73  74  71  73  71  73  69  71  69  71  67  71  )
+    (1/2 1/2 1/2 1/4 1/2 3/4 1/2 1/4 1/2 3/4 1/2 1/2 1/2 1/2 1 )))
+(define popcorn3
+  '(
+    (71  73  74  73  74  71  73  71  73  69  71  69  71  73  74  )
+    (1/2 1/2 1/2 1/4 1/2 3/4 1/2 1/4 1/2 3/4 1/2 1/2 1/2 1/2 1 )))
+(define popcorn4
+  '(
+    (78   76   78  74  69  74  66 )
+    (1/2  1/2  1/2 1/2 1/2 1/2 2/2)))
+(define popcorn5
+  '(
+    (78  80  81  80  81  78  80  78  80  76  78  76  73  76  78)
+    (1/2 1/2 1/2 1/4 1/2 3/4 1/2 1/4 1/2 3/4 1/2 1/2 1/2 1/2 1 )))
 
 
+(define notes (append (car popcorn1)
+		      (car popcorn1)
+		      (car popcorn2)
+		      (car popcorn1)
+		      (car popcorn1)
+		      (car popcorn3)
+
+		      (car popcorn4)
+		      (car popcorn4)
+		      (car popcorn5)
+		      (car popcorn4)
+		      (car popcorn4)
+		      (car popcorn5)
+		      
+		      
+		      ))
+(define durations (append
+		   (car (cdr popcorn1))
+		   (car (cdr popcorn1))
+		   (car (cdr popcorn2))
+		   (car (cdr popcorn1))
+		   (car (cdr popcorn1))
+		   (car (cdr popcorn3))
+
+		   (car (cdr popcorn4))
+		   (car (cdr popcorn4))
+		   (car (cdr popcorn5))
+		   (car (cdr popcorn4))
+		   (car (cdr popcorn4))
+		   (car (cdr popcorn5))
+
+		   
+		   
+		   ))
+  
 (define lead
-  (let ( (ns '(60 58 60 55 51 55 50                ))
-         (ds '(1/2  1/2  1/2 1/2 1/2 1/2 2/2       )))
+  (let ( (ns notes)
+         (ds durations))
     (lambda (beat notes durations)
       (play fmsynth (- (car notes) 0) 90 (car durations))
       (play synth (- (car notes) 0) 90 (car durations))
@@ -24,9 +72,16 @@
                 (if (null? (cdr durations)) ds (cdr durations))))))
 
 
+
+(define rhythm
+  (lambda (beat)
+    (play-note (*metro* beat) drums 52 100 11025)
+    (play-note (*metro* beat) drums 88 100 11025)
+    (callback (*metro* (+ beat 0.2)) 'rhythm (+ beat 0.25))))
+
+
 (rhythm (*metro* 'get-beat))
 
 (lead (*metro* 'get-beat 8) '(0) '(0))
 
-
-(*metro* 'set-tempo 90)
+(*metro* 'set-tempo 120)

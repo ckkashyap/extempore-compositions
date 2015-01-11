@@ -1,0 +1,61 @@
+(sys:load "/Users/kashyap/Documents/extempore-compositions/initialize.xtm")
+(sys:load "/Users/kashyap/Documents/extempore-compositions/drums.xtm")
+
+
+
+;; messiaen drum kit
+(define *metro* (make-metro 120))
+
+(define *metre1* (make-metre '(4 0.5 0.5 0.5) .5))
+(define *metre2* (make-metre '(4 4) .5))
+
+
+(define metre-test
+  (lambda (beat)
+    (play-note (*metro* beat) drums 52 100 11025)
+    (play-note (*metro* beat) drums 88 100 11025)
+    (callback (*metro* (+ beat 0.2)) 'metre-test (+ beat 0.25))))
+
+(define metre-test1
+  (lambda (beat b)
+    (if (or (= b 0) (= b 2))
+	(play-note (*metro* beat) drums 26 120 10000))
+    
+    (callback (*metro* (+ beat 0.2)) 'metre-test1 (+ beat 0.25)  (if (= b 7) 0 (+ 1 b )))))
+
+
+(define churaliya1
+  '(
+    (68   69   69  72   71  69  69     68     71.1    71      69      67    69    67        62 )
+    (0.1  0.15 0.5 0.25 0.5 0.5 0.75   0.10   0.10    0.55    0.5     0.65  0.05  0.05      3.25)
+    )
+  )
+
+(define churaliya2
+  '(
+    (69   69  72   71  69  69     68     71.1    71      69  68 )
+    (0.25 0.5 0.25 0.5 0.5 0.75   0.10   0.10    0.55    0.5 4.0 )
+    )
+  )
+
+(define churaliya-notes (append (car churaliya1) (car churaliya2)))
+(define churaliya-durations (append (car (cdr churaliya1)) (car (cdr churaliya2))))
+
+
+(define metre-test2
+  (let ( (ns churaliya-notes)
+         (ds churaliya-durations))
+    (lambda (beat notes durations)
+      (play fmsynth (- (car notes) 12) 90 (car durations))
+      (play synth (- (car notes) 12) 90 (car durations))
+      (callback (*metro* (+ beat (* 0.95 (car durations)))) 'metre-test2  (+ beat (car durations))
+                (if (null? (cdr notes))     ns (cdr notes))                
+                (if (null? (cdr durations)) ds (cdr durations))))))
+
+
+(metre-test (*metro* 'get-beat))
+
+(metre-test1 (*metro* 'get-beat 8) 0)
+(metre-test2 (*metro* 'get-beat 8) '(0) '(0))
+
+(*metro* 'set-tempo 90)

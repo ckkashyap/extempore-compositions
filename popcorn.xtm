@@ -1,0 +1,32 @@
+(sys:load "/Users/kashyap/Documents/extempore-compositions/initialize.xtm")
+(sys:load "/Users/kashyap/Documents/extempore-compositions/drums.xtm")
+
+
+
+;; messiaen drum kit
+(define *metro* (make-metro 120))
+
+(define rhythm
+  (lambda (beat)
+    (play-note (*metro* beat) drums 52 100 11025)
+    (play-note (*metro* beat) drums 88 100 11025)
+    (callback (*metro* (+ beat 0.2)) 'rhythm (+ beat 0.25))))
+
+
+(define lead
+  (let ( (ns '(60 58 60 55 51 55 50                ))
+         (ds '(1/2  1/2  1/2 1/2 1/2 1/2 2/2       )))
+    (lambda (beat notes durations)
+      (play fmsynth (- (car notes) 0) 90 (car durations))
+      (play synth (- (car notes) 0) 90 (car durations))
+      (callback (*metro* (+ beat (* 0.95 (car durations)))) 'lead  (+ beat (car durations))
+                (if (null? (cdr notes))     ns (cdr notes))                
+                (if (null? (cdr durations)) ds (cdr durations))))))
+
+
+(rhythm (*metro* 'get-beat))
+
+(lead (*metro* 'get-beat 8) '(0) '(0))
+
+
+(*metro* 'set-tempo 90)

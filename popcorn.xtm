@@ -39,8 +39,6 @@
 		      (car popcorn4)
 		      (car popcorn4)
 		      (car popcorn5)
-		      
-		      
 		      ))
 (define durations (append
 		   (car (cdr popcorn1))
@@ -56,9 +54,6 @@
 		   (car (cdr popcorn4))
 		   (car (cdr popcorn4))
 		   (car (cdr popcorn5))
-
-		   
-		   
 		   ))
   
 (define lead
@@ -80,8 +75,27 @@
     (callback (*metro* (+ beat 0.2)) 'rhythm (+ beat 0.25))))
 
 
+(define rhythm1
+  (let ( (ns '(88))
+         (ds '(1)))
+    (lambda (beat notes durations)
+      (println "beat = " beat)
+      (println "*metro* beat = " (*metro* beat))
+      (println "*metro* get-beat = " (*metro* 'get-beat))
+      (println "*metro* *metro* = " (*metro* (*metro* 'get-beat)))
+      (println "*metro* get-beat 4 = " (*metro* 'get-beat 4))
+      (println "")
+      (play drums (car notes) 120 (car durations))
+      ;(callback (*metro* (+ beat (* 0.95 (car durations)))) 'rhythm1  (+ beat (car durations))
+      (callback (- (*metro*  (*metro* 'get-beat 2)) 100) 'rhythm1  (*metro* 'get-beat 2)
+                (if (null? (cdr notes))     ns (cdr notes))        
+                (if (null? (cdr durations)) ds (cdr durations))))))
+(rhythm1 (*metro* 'get-beat 4) '(0) '(0))
+
+
 (rhythm (*metro* 'get-beat))
 
 (lead (*metro* 'get-beat 8) '(0) '(0))
 
-(*metro* 'set-tempo 120)
+
+(*metro* 'set-tempo 150)
